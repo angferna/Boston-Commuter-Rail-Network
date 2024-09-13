@@ -1,0 +1,796 @@
+Project Summary: This project is about Boston’s Commuter Rail System. The data complied is organized into Source, Destination, Distance (in miles), Identifier (Name of Line/Rail). 
+
+List of Algorithms:
+1. Dijkstra’s Algorithm (SSSP)
+2. Floyd Warshall Algorithm (MSSP)
+3. Bellman-Ford Algorithm
+4. Kruskal’s Algorithm (MST)
+5. Prim’s Algorithm (MST)
+
+Source Codes:
+
+Main - Adjacency List
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        String fileName = "RailData.txt";
+
+        // Variable to store the number of lines
+        int V = 0;
+        int E = 0;
+        String source = "";
+
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+            // Counting the number of lines
+            while (br.readLine() != null) {
+                V++;
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading the file: " + e.getMessage());
+        }
+
+        System.out.println("Number of lines in the file: " + V);
+
+        DijkstraAlgorithm graphD = new DijkstraAlgorithm(V);
+        Graph graph = new Graph(V, V); // Initialize with V edges initially
+
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            int edgeIndex = 0;
+            while ((line = br.readLine()) != null) {
+                // Splitting the line by comma
+                String[] parts = line.split(",");
+                E++;
+
+                source = parts[0].trim();
+                String destination = parts[1].trim();
+                double weight = Double.parseDouble(parts[2].trim());
+
+                graphD.addEdge(source, destination, weight);
+
+                // Add vertices to the map if not already present
+                if (!graph.vertexMap.containsKey(source)) {
+                    graph.vertexMap.put(source, graph.vertexMap.size());
+                }
+                if (!graph.vertexMap.containsKey(destination)) {
+                    graph.vertexMap.put(destination, graph.vertexMap.size());
+                }
+
+                graph.addEdge(graph, source, destination, weight, edgeIndex);
+                edgeIndex++;
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading the file: " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.err.println("Error parsing weight as double: " + e.getMessage());
+        }
+
+        source = "South Station"; // Specify the source 
+        System.out.println("Source: " + source);
+
+        System.out.println("Dijkstra's Algorithm:");
+        graphD.dijkstra(source);
+
+        System.out.println();
+        System.out.println();
+        System.out.println();
+
+        System.out.println("Bellman-Ford's Algorithm:");
+        if (!graph.vertexMap.containsKey(source)) {
+            System.out.println("Source node '" + source + "' not found in the graph.");
+        } else {
+            graph.BellmanFord(graph, source);
+        }
+    }
+}
+
+Dijkstra’s Algorithm (SSSP)
+
+import java.text.DecimalFormat;
+import java.util.*;
+
+public class DijkstraAlgorithm {
+    private int V; // Number of vertices
+    private Map<String, List<Node>> adj; // Adjacency list representing the graph
+
+    // Node class to represent each vertex with its weight
+    class Node implements Comparable<Node> {
+        String vertex;
+        double weight;
+
+        Node(String v, double weight1) {
+            vertex = v;
+            weight = weight1;
+        }
+
+        public int compareTo(Node other) {
+            return Double.compare(weight, other.weight);
+        }
+    }
+
+    // Constructor to initialize the graph
+    DijkstraAlgorithm(int vertices) {
+        V = vertices;
+        adj = new HashMap<>();
+        for (int i = 0; i < V; i++) {
+            //adj.put(String.valueOf((char) ('A' + i)), new ArrayList<>());
+        }
+    }
+
+    // Add an edge to the graph
+    void addEdge(String source, String destination, double weight) {
+        // Initialize the list for the source vertex if not already initialized
+        if (!adj.containsKey(source)) {
+            adj.put(source, new ArrayList<>());
+        }
+        // Initialize the list for the destination vertex if not already initialized
+        if (!adj.containsKey(destination)) {
+            adj.put(destination, new ArrayList<>());
+        }
+        adj.get(source).add(new Node(destination, weight));
+        adj.get(destination).add(new Node(source, weight));
+    }
+
+
+    // Dijkstra's algorithm
+    void dijkstra(String source) {
+        PriorityQueue<Node> pq = new PriorityQueue<>();
+        Map<String, Double> dist = new HashMap<>();
+        for (String vertex : adj.keySet()) {
+            dist.put(vertex, Double.MAX_VALUE);
+        }
+        dist.put(source, 0.0);
+        pq.add(new Node(source, 0));
+
+        while (!pq.isEmpty()) {
+            String u = pq.poll().vertex;
+            for (Node neighbor : adj.get(u)) {
+                String v = neighbor.vertex;
+                double w = neighbor.weight;
+                if (dist.get(v) > dist.get(u) + w) {
+                    dist.put(v, dist.get(u) + w);
+                    pq.add(new Node(v, dist.get(v)));
+                }
+            }
+        }
+
+        // Print the shortest distances from the source vertex
+        System.out.println("Shortest distances from vertex " + source + ":");
+        DecimalFormat df = new DecimalFormat("#.#");
+        for (String vertex : dist.keySet()) {
+            System.out.println("Vertex " + vertex + ": " + Double.parseDouble(df.format(dist.get(vertex))));
+        }
+
+    }
+
+    // Pretty print the graph
+    void printGraph() {
+        System.out.println("Graph:");
+        for (String vertex : adj.keySet()) {
+            System.out.print(vertex + " <-> ");
+            List<Node> neighbors = adj.get(vertex);
+            for (int i = 0; i < neighbors.size(); i++) {
+                Node neighbor = neighbors.get(i);
+                System.out.print(neighbor.vertex + "(" + neighbor.weight + ")");
+                if (i < neighbors.size() - 1) {
+                    System.out.print(", ");
+                }
+            }
+            System.out.println();
+        }
+    }
+
+}
+
+Bellman-Ford Algorithm
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+// A class to represent a connected, directed and weighted graph
+class Graph {
+
+    // A class to represent a weighted edge in graph
+    class Edge {
+        String src, dest;
+        double weight;
+
+        Edge() {
+            src = dest = null;
+            weight = 0.0;
+        }
+    }
+
+    int V, E;
+    Edge edge[];
+    Map<String, Integer> vertexMap; // Map to store vertex indices
+
+    // Creates a graph with V vertices and E edges
+    Graph(int v, int e) {
+        V = v;
+        E = e;
+        edge = new Edge[e];
+        for (int i = 0; i < e; ++i)
+            edge[i] = new Edge();
+        vertexMap = new HashMap<>();
+    }
+
+    // The main function that finds shortest distances from
+    // src to all other vertices using Bellman-Ford
+    // algorithm. The function also detects negative weight
+    // cycle
+    void BellmanFord(Graph graph, String src) {
+        int V = graph.V, E = graph.E;
+        double dist[] = new double[V];
+
+        // Step 1: Initialize distances from src to all
+        // other vertices as INFINITE
+        Arrays.fill(dist, Double.MAX_VALUE);
+        dist[vertexMap.get(src)] = 0.0;
+
+        // Step 2: Relax all edges |V| - 1 times. A simple
+        // shortest path from src to any other vertex can
+        // have at-most |V| - 1 edges
+        for (int i = 1; i < V; ++i) {
+            for (int j = 0; j < E; ++j) {
+                int u = vertexMap.get(graph.edge[j].src);
+                int v = vertexMap.get(graph.edge[j].dest);
+                double weight = graph.edge[j].weight;
+                if (dist[u] != Double.MAX_VALUE && dist[u] + weight < dist[v])
+                    dist[v] = dist[u] + weight;
+            }
+        }
+
+        // Step 3: check for negative-weight cycles. The
+        // above step guarantees shortest distances if graph
+        // doesn't contain negative weight cycle. If we get
+        // a shorter path, then there is a cycle.
+        for (int j = 0; j < E; ++j) {
+            int u = vertexMap.get(graph.edge[j].src);
+            int v = vertexMap.get(graph.edge[j].dest);
+            double weight = graph.edge[j].weight;
+            if (dist[u] != Double.MAX_VALUE && dist[u] + weight < dist[v]) {
+                System.out.println("Graph contains negative weight cycle");
+                return;
+            }
+        }
+        printArr(dist, V);
+    }
+
+    public void addEdge(Graph graph, String source, String destination, double weight, int edgeIndex) {
+        graph.edge[edgeIndex].src = source;
+        graph.edge[edgeIndex].dest = destination;
+        graph.edge[edgeIndex].weight = weight;
+    }
+
+    // A utility function used to print the solution
+    void printArr(double dist[], int V) {
+        DecimalFormat df = new DecimalFormat("#.#");
+        System.out.println("Vertex Distance from Source");
+        for (Map.Entry<String, Integer> entry : vertexMap.entrySet()) {
+            String vertex = entry.getKey();
+            int index = entry.getValue();
+            System.out.println(vertex + "\t\t" + Double.parseDouble(df.format(dist[index])));
+        }
+    }
+
+    
+
+    // Utility function to get the index of a vertex
+    int getIndex(String vertex) {
+        return vertexMap.getOrDefault(vertex, -1);
+    }
+
+    // Utility function to get the name of a vertex
+    String getVertex(int index) {
+        for (Map.Entry<String, Integer> entry : vertexMap.entrySet()) {
+            if (entry.getValue() == index) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
+    // Driver's code
+    public static void main(String[] args) {
+
+        String fileName = "RailData.txt";
+
+        // Variable to store the number of lines
+        int V = 0;
+        int E = 0;
+        String source = "";
+
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+            // Counting the number of lines
+            while (br.readLine() != null) {
+                V++;
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading the file: " + e.getMessage());
+        }
+
+        System.out.println("Number of lines in the file: " + V);
+        Graph graph = new Graph(V, V); // Initialize with V edges initially
+
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            int edgeIndex = 0;
+            while ((line = br.readLine()) != null) {
+                // Splitting the line by comma
+                String[] parts = line.split(",");
+                E++;
+
+                source = parts[0].trim();
+                String destination = parts[1].trim();
+                double weight = Double.parseDouble(parts[2].trim());
+
+                // Add vertices to the map if not already present
+                if (!graph.vertexMap.containsKey(source)) {
+                    graph.vertexMap.put(source, graph.vertexMap.size());
+                }
+                if (!graph.vertexMap.containsKey(destination)) {
+                    graph.vertexMap.put(destination, graph.vertexMap.size());
+                }
+
+                graph.addEdge(graph, source, destination, weight, edgeIndex);
+                edgeIndex++;
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading the file: " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.err.println("Error parsing weight as double: " + e.getMessage());
+        }
+
+        source = "South Station"; // Specify the source node name
+        System.out.println("Source node specified in Main: " + source);
+        if (!graph.vertexMap.containsKey(source)) {
+            System.out.println("Source node '" + source + "' not found in the graph.");
+        } else {
+            graph.BellmanFord(graph, source);
+        }
+    }
+}
+
+Main - Adjacency Matrix
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+public class MainMST {
+
+    // Helper class to represent an edge
+    static class Edge implements Comparable<Edge> {
+        String source;
+        String destination;
+        double weight;
+
+        Edge(String source, String destination, double weight) {
+            this.source = source;
+            this.destination = destination;
+            this.weight = weight;
+        }
+
+        @Override
+        public int compareTo(Edge other) {
+            return Double.compare(this.weight, other.weight);
+        }
+    }
+    
+    public static void main(String[] args) {
+        String filename = "RailData.txt";
+
+        // Initialize map to store mapping from string labels to indices
+        Map<String, Integer> labelToIndex = new HashMap<>();
+        ArrayList<String> labelsInOrder = new ArrayList<>();
+        int currentIndex = 0;
+
+        // Initialize map to store edge weights
+        Map<String, Double> edgeWeights = new HashMap<>();
+
+        // Read data from the file and populate the maps
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                String source = parts[0];
+                String destination = parts[1];
+                double weight = Double.parseDouble(parts[2]);
+                
+                if (!labelToIndex.containsKey(source)) {
+                    labelToIndex.put(source, currentIndex++);
+                    labelsInOrder.add(source);
+                }
+                
+                if (!labelToIndex.containsKey(destination)) {
+                    labelToIndex.put(destination, currentIndex++);
+                    labelsInOrder.add(destination);
+                }
+
+                // Store edge weight in the map
+                edgeWeights.put(source + "_" + destination, weight);
+                edgeWeights.put(destination + "_" + source, weight); //  the graph is undirected
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Initialize the adjacency matrix
+        int numVertices = labelToIndex.size();
+        System.out.println("Vertices inside main : " + numVertices);
+        double[][] adjacencyMatrix = new double[numVertices][numVertices];
+
+        for (int i = 0; i < numVertices; i++) {
+            for (int j = 0; j < numVertices; j++) {
+                String sourceLabel = labelsInOrder.get(i);
+                String destLabel = labelsInOrder.get(j);
+                String edgeKey = sourceLabel + "_" + destLabel;
+
+                // Set weight to 0 if source and destination are the same
+                if (sourceLabel.equals(destLabel)) {
+                    adjacencyMatrix[i][j] = 0;
+                } else {
+                    adjacencyMatrix[i][j] = edgeWeights.getOrDefault(edgeKey, Double.POSITIVE_INFINITY);
+                }
+            }
+        }
+
+        System.out.println("Original Matrix:");
+        FloydWarshallAlgorithm.printMatrix(adjacencyMatrix, labelsInOrder, numVertices);
+
+        System.out.println();
+        System.out.println();
+        System.out.println();
+
+        System.out.println("Kruskal's Algorithm:");
+        KruskalsAlgorithm.kruskalMST(adjacencyMatrix, numVertices, labelsInOrder, labelToIndex);
+
+        System.out.println();
+        System.out.println();
+        System.out.println();
+
+        System.out.println("Prim's Algorithm:");
+        PrimsAlgorithm.primMST(adjacencyMatrix, numVertices,labelsInOrder);
+
+        System.out.println();
+        System.out.println();
+        System.out.println();
+
+        System.out.println("Floyd-Warshall's Algorithm:");
+        double[][] result = FloydWarshallAlgorithm.floydWarshall(adjacencyMatrix,numVertices);
+        System.out.println();
+
+        FloydWarshallAlgorithm.printMatrix(result, labelsInOrder, numVertices);
+
+    }
+}
+
+Kruskal’s Algorithm (MST)
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+public class KruskalsAlgorithm {
+
+    // Helper class to represent an edge
+    static class Edge implements Comparable<Edge> {
+        String source;
+        String destination;
+        double weight;
+
+        Edge(String source, String destination, double weight) {
+            this.source = source;
+            this.destination = destination;
+            this.weight = weight;
+        }
+
+        @Override
+        public int compareTo(Edge other) {
+            return Double.compare(this.weight, other.weight);
+        }
+    }
+    
+    public static void main(String[] args) {
+        String filename = "RailData.txt";
+
+        // Initialize map to store mapping from string labels to indices
+        Map<String, Integer> labelToIndex = new HashMap<>();
+        ArrayList<String> labelsInOrder = new ArrayList<>();
+        int currentIndex = 0;
+
+        // Initialize map to store edge weights
+        Map<String, Double> edgeWeights = new HashMap<>();
+
+        // Read data from the file and populate the maps
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                String source = parts[0];
+                String destination = parts[1];
+                double weight = Double.parseDouble(parts[2]);
+                
+                if (!labelToIndex.containsKey(source)) {
+                    labelToIndex.put(source, currentIndex++);
+                    labelsInOrder.add(source);
+                }
+                
+                if (!labelToIndex.containsKey(destination)) {
+                    labelToIndex.put(destination, currentIndex++);
+                    labelsInOrder.add(destination);
+                }
+
+                // Store edge weight in the map
+                edgeWeights.put(source + "_" + destination, weight);
+                edgeWeights.put(destination + "_" + source, weight); //  the graph is undirected
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Initialize the adjacency matrix
+        int numVertices = labelToIndex.size();
+        System.out.println("Vertices inside main : " + numVertices);
+        double[][] adjacencyMatrix = new double[numVertices][numVertices];
+
+        for (int i = 0; i < numVertices; i++) {
+            for (int j = 0; j < numVertices; j++) {
+                String sourceLabel = labelsInOrder.get(i);
+                String destLabel = labelsInOrder.get(j);
+                String edgeKey = sourceLabel + "_" + destLabel;
+
+                // Set weight to 0 if source and destination are the same
+                if (sourceLabel.equals(destLabel)) {
+                    adjacencyMatrix[i][j] = 0;
+                } else {
+                    adjacencyMatrix[i][j] = edgeWeights.getOrDefault(edgeKey, Double.POSITIVE_INFINITY);
+                }
+            }
+        }
+
+        kruskalMST(adjacencyMatrix,numVertices, labelsInOrder, labelToIndex);
+    }
+
+    static void kruskalMST(double[][] adjacencyMatrix, int numVertices, ArrayList<String> labelsInOrder, Map<String, Integer> labelToIndex){
+        // Apply Kruskal's Algorithm
+        ArrayList<Edge> edges = new ArrayList<>();
+        for (int i = 0; i < numVertices; i++) {
+            for (int j = i + 1; j < numVertices; j++) {
+                if (adjacencyMatrix[i][j] != 0 && adjacencyMatrix[i][j] != Double.POSITIVE_INFINITY) {
+                    edges.add(new Edge(labelsInOrder.get(i), labelsInOrder.get(j), adjacencyMatrix[i][j]));
+                }
+            }
+        }
+        
+        // Sort edges based on weights
+        Collections.sort(edges);
+
+        // Create a parent array for union-find operations
+        int[] parent = new int[numVertices];
+        for (int i = 0; i < numVertices; i++) {
+            parent[i] = i;
+        }
+
+        // Kruskal's Algorithm
+        ArrayList<Edge> mst = new ArrayList<>();
+        for (Edge edge : edges) {
+            int sourceIndex = labelToIndex.get(edge.source);
+            int destIndex = labelToIndex.get(edge.destination);
+            int sourceParent = findParent(parent, sourceIndex);
+            int destParent = findParent(parent, destIndex);
+
+            if (sourceParent != destParent) {
+                mst.add(edge);
+                parent[sourceParent] = destParent;
+            }
+        }
+
+        System.out.println("Minimum Spanning Tree:");
+        double sum = 0.0;
+        for (Edge edge : mst) {
+            System.out.println(edge.source + " - " + edge.destination + " : " + edge.weight);
+            sum += edge.weight;
+        }
+        System.out.println("Minimum Cost: "+ sum);
+    }
+
+    // Helper method to find parent of a vertex in union-find
+    static int findParent(int[] parent, int vertex) {
+        if (parent[vertex] != vertex) {
+            parent[vertex] = findParent(parent, parent[vertex]);
+        }
+        return parent[vertex];
+    }
+}
+
+Prim’s Algorithm (MST)
+
+import java.util.ArrayList;
+
+public class PrimsAlgorithm {
+
+    static int minKey(double[] key, Boolean mstSet[], int V) {
+        double min = Integer.MAX_VALUE;
+        int min_index = -1;
+    
+        for (int v = 0; v < V; v++) {
+            if (mstSet[v] == false && key[v] < min) {
+                min = key[v];
+                min_index = v;
+            }
+        }
+    
+        // Return V if no minimum key is found
+        return min_index == -1 ? V : min_index;
+    }
+    
+
+    static void primMST(double[][] adjacencyMatrix, int V)
+    {
+        int parent[] = new int[V];
+        double key[] = new double[V];
+        Boolean mstSet[] = new Boolean[V];
+ 
+        for (int i = 0; i < V; i++) {
+            key[i] = Integer.MAX_VALUE;
+            mstSet[i] = false;
+        }
+ 
+        key[0] = 0;
+        parent[0] = -1;
+
+        for (int count = 0; count < V - 1; count++) {
+            int u = minKey(key, mstSet, V);
+            mstSet[u] = true;
+            for (int v = 0; v < V; v++)
+                if (adjacencyMatrix[u][v] != 0 && mstSet[v] == false
+                    && adjacencyMatrix[u][v] < key[v]) {
+                    parent[v] = u;
+                    key[v] = adjacencyMatrix[u][v];
+                }
+        }
+
+        printMatrix(parent, adjacencyMatrix,V);
+    }
+
+    static void primMST(double[][] adjacencyMatrix, int V, ArrayList<String> labelsInOrder) {
+        int parent[] = new int[V];
+        double key[] = new double[V];
+        Boolean mstSet[] = new Boolean[V];
+    
+        for (int i = 0; i < V; i++) {
+            key[i] = Integer.MAX_VALUE;
+            mstSet[i] = false;
+        }
+    
+        key[0] = 0;
+        parent[0] = -1;
+    
+        for (int count = 0; count < V - 1; count++) {
+            int u = minKey(key, mstSet, V);
+     
+            // Check if minimum key found
+            if (u != V) {
+                mstSet[u] = true;
+    
+                for (int v = 0; v < V; v++) {
+                    if (adjacencyMatrix[u][v] != 0 && mstSet[v] == false
+                            && adjacencyMatrix[u][v] < key[v]) {
+                        parent[v] = u;
+                        key[v] = adjacencyMatrix[u][v];
+                    }
+                }
+            }
+        }
+        //printMatrix(parent, adjacencyMatrix, V);
+        printMatrix(parent, adjacencyMatrix, V, labelsInOrder);
+
+    }
+    
+    private static void printMatrix(int[] parent, double[][] adjacencyMatrix, int V) {
+        System.out.println("Edge \tWeight");
+        for (int i = 1; i < V; i++)
+            System.out.println(parent[i] + " - " + i + "\t"
+                               + adjacencyMatrix[i][parent[i]]);
+    }
+
+    private static void printMatrix(int[] parent, double[][] adjacencyMatrix, int V, ArrayList<String> labelsInOrder) {
+        System.out.println("Edge \tWeight");
+        double sum = 0.0;
+        for (int i = 1; i < V; i++) {
+            if (adjacencyMatrix[i][parent[i]] != Double.POSITIVE_INFINITY) {
+                String source = labelsInOrder.get(parent[i]);
+                String destination = labelsInOrder.get(i);
+                System.out.println(source + " - " + destination + "\t" + adjacencyMatrix[i][parent[i]]);
+                sum  += adjacencyMatrix[i][parent[i]];
+            }
+        }
+        System.out.println("Minimum Cost: "+ sum);
+    }
+    
+}
+
+Floyd Warshall Algorithm (MSSP)
+
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+
+public class FloydWarshallAlgorithm {
+
+    // Run the Floyd Warshall algorithm
+    static double[][] floydWarshall(double dist[][], int V)
+    {
+        System.out.println("Vertices: " + V);
+        int i, j, k;
+        for (k = 0; k < V; k++) {
+            for (i = 0; i < V; i++) {
+                for (j = 0; j < V; j++) {
+                    if (dist[i][k] + dist[k][j]
+                        < dist[i][j])
+                        dist[i][j]
+                            = dist[i][k] + dist[k][j];
+                }
+            }
+        }
+
+        // Round the values to 1 decimal place
+        DecimalFormat df = new DecimalFormat("#.#");
+        for (i = 0; i < V; i++) {
+            for (j = 0; j < V; j++) {
+                // Check if the value is infinity
+                if (Double.isInfinite(dist[i][j])) {
+                    continue; // Skip rounding for infinity
+                }
+                dist[i][j] = Double.parseDouble(df.format(dist[i][j]));
+            }
+        }
+
+        return dist;
+
+    }
+
+    public static void printMatrix(double[][] adjacencyMatrix, ArrayList<String> labelsInOrder, int numVertices) {
+        // Print the labels
+        System.out.print("  ,");
+        for (String label : labelsInOrder) {
+            System.out.print(label + ", ");
+        }
+        System.out.println();
+
+        // Print the adjacency matrix with labels
+        for (int i = 0; i < numVertices; i++) {
+            System.out.print(labelsInOrder.get(i) + ", ");
+            for (int j = 0; j < numVertices; j++) {
+                if (adjacencyMatrix[i][j] == Double.POSITIVE_INFINITY) {
+                    System.out.print("INF, ");
+                } else {
+                    System.out.print(adjacencyMatrix[i][j] + ",   ");
+                }
+            }
+            System.out.println();
+        }
+    }
+}
+

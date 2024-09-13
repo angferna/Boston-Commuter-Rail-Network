@@ -1,0 +1,99 @@
+South Station,Newmarket,2.2,Fairmount
+Newmarket,Uphams Corner,0.6,Fairmount
+Uphams Corner,Four Corners/Geneva,1.0,Fairmount
+Four Corners/Geneva,Talbot Avenue,0.7,Fairmount
+Talbot Avenue,Morton Street,1.0,Fairmount
+Morton Street,Blue Hill Avenue,0.8,Fairmount
+Blue Hill Avenue,Fairmount,2.0,Fairmount
+Fairmount,Readville,1.5,Fairmount
+North Station,Porter,3.6,Fitchburg
+Porter,Belmont,3.2,Fitchburg
+Belmont,Waverley,1.1,Fitchburg
+Waverley,Waltham,2.8,Fitchburg
+Waltham,Brandeis/Roberts,1.5,Fitchburg
+Brandeis/Roberts,Kendal Green,2.3,Fitchburg
+Kendal Green,Lincoln,3.8,Fitchburg
+Lincoln,Concord,3.8,Fitchburg
+Concord,West Concord,1.9,Fitchburg
+West Concord,South Acton,3.7,Fitchburg
+South Acton,Littleton/Route 495,5.5,Fitchburg
+Littleton/Route 495,Ayer,6.7,Fitchburg
+Ayer,Shirley,3.4,Fitchburg
+Shirley,North Leominster,5.4,Fitchburg
+North Leominster,Fitchburg,4.5,Fitchburg
+Fitchburg,Wachusett,4.6,Fitchburg
+South Station,Back Bay,1.0,Framingham/​Worcester
+Back Bay,Lansdowne,1.4,Framingham/​Worcester
+Lansdowne,Boston Landing,2.3,Framingham/​Worcester
+Boston Landing,Newtonville,3.5,Framingham/​Worcester
+Newtonville,West Newton,1.2,Framingham/​Worcester
+West Newton,Auburndale,0.8,Framingham/​Worcester
+Auburndale,Wellesley Farms,2.2,Framingham/​Worcester
+Wellesley Farms,Wellesley Hills,0.8,Framingham/​Worcester
+Wellesley Hills,Wellesley Square,1.4,Framingham/​Worcester
+Wellesley Square,Natick Center,3.0,Framingham/​Worcester
+Natick Center,West Natick,2.5,Framingham/​Worcester
+West Natick,Framingham,1.6,Framingham/​Worcester
+Framingham,Ashland,3.9,Framingham/​Worcester
+Ashland,Southborough,2.4,Framingham/​Worcester
+Southborough,Westborough,5.0,Framingham/​Worcester
+Westborough,Grafton,2.9,Framingham/​Worcester
+Grafton,Worcester,7.5,Framingham/​Worcester
+South Station,JFK/UMass,2.5,Greenbush
+JFK/UMass,Quincy Center,5.9,Greenbush
+Quincy Center,Weymouth Landing/East Braintree,4.4,Greenbush
+Weymouth Landing/East Braintree,East Weymouth,2.6,Greenbush
+East Weymouth,West Hingham,1.8,Greenbush
+West Hingham,Nantasket Junction,2.2,Greenbush
+Nantasket Junction,Cohasset,1.5,Greenbush
+Cohasset,North Scituate,3.7,Greenbush
+North Scituate,Greenbush,4.8,Greenbush
+North Station,Malden Center,4.9,Haverhill
+Malden Center,Oak Grove,0.6,Haverhill
+Oak Grove,Wyoming Hill,1.0,Haverhill
+Wyoming Hill,Melrose/Cedar Park,0.4,Haverhill
+Melrose/Cedar Park,Melrose Highlands,0.7,Haverhill
+Melrose Highlands,Greenwood,1.0,Haverhill
+Greenwood,Wakefield,1.5,Haverhill
+Wakefield,Reading,2.1,Haverhill
+Reading,North Wilmington,4.5,Haverhill
+North Wilmington,Ballardvale,4.5,Haverhill
+Ballardvale,Andover,2.4,Haverhill
+Andover,Lawrence,3.2,Haverhill
+Lawrence,Bradford,6.6,Haverhill
+Bradford,Haverhill,0.5,Haverhill
+South Station,JFK/UMass,2.5,Kingston
+JFK/UMass,Quincy Center,5.9,Kingston
+Quincy Center,Braintree,3.4,Kingston
+Braintree,South Weymouth,5.5,Kingston
+South Weymouth,Abington,3.6,Kingston
+Abington,Whitman,2.0,Kingston
+Whitman,Hanson,3.9,Kingston
+Hanson,Halifax,4.3,Kingston
+Halifax,Kingston,7.0,Kingston
+North Station,West Medford,5.6,Lowell
+West Medford,Wedgemere,1.8,Lowell
+Wedgemere,Anderson/Woburn,6.0,Lowell
+Anderson/Woburn,Wilmington,3.2,Lowell
+Wilmington,North Billerica,7.5,Lowell
+North Billerica,Lowell,3.9,Lowell
+South Station,JFK/UMass,2.5,Middleborough/​Lakeville
+JFK/UMass,Quincy Center,5.9,Middleborough/​Lakeville
+Quincy Center,Braintree,3.4,Middleborough/​Lakeville
+Braintree,Holbrook/Randolph,4.2,Middleborough/​Lakeville
+Holbrook/Randolph,Montello,3.6,Middleborough/​Lakeville
+Montello,Brockton,1.7,Middleborough/​Lakeville
+Brockton,Campello,1.8,Middleborough/​Lakeville
+Campello,Bridgewater,5.8,Middleborough/​Lakeville
+Bridgewater,Middleborough/Lakeville,9.4,Middleborough/​Lakeville
+South Station,Back Bay,1.0,Needham
+Back Bay,Ruggles,1.0,Needham
+Ruggles,Forest Hills,2.7,Needham
+Forest Hills,Roslindale Village,1.2,Needham
+Roslindale Village,Bellevue,0.7,Needham
+Bellevue,Highland,0.4,Needham
+Highland,West Roxbury,0.4,Needham
+West Roxbury,Hersey,3.0,Needham
+Hersey,Needham Junction,1.0,Needham
+Needham Junction,Needham Center,0.7,Needham
+Needham Center,Needham Heights,0.8,Needham
